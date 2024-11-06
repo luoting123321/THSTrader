@@ -294,6 +294,35 @@ class THSTrader:
             "可用余额": int(stock_available.replace(",", ""))
         }
     
+    def __ocr_parse_holding2(self, path):
+        img = Image.open(path)
+        # 定义需要识别的区域
+        regions = {
+            "name": (11, 11, 165, 55),     # 股票名称区域
+            "count": (419, 11, 548, 55),   # 股票余额区域
+            "available": (419, 60, 548, 102)  # 可用余额区域
+        }
+        
+        # 直接在原图上识别指定区域
+        results = {}
+        for key, bbox in regions.items():
+            try:
+                result = self.reader.readtext(
+                    img, 
+                    bbox=bbox,  # 指定识别区域
+                    detail=0    # 只返回文本结果
+                )[0]  # 取第一个结果
+                results[key] = result
+            except:
+                # 处理可能的识别失败，主要是可用余额可能为空
+                results[key] = "0" if key == "available" else ""
+        
+        return {
+            "股票名称": results["name"].replace(" ", ""),
+            "股票余额": int(results["count"].replace(",", "")),
+            "可用余额": int(results["available"].replace(",", ""))
+        }
+    
     def __ocr_parse_withdrawal(self, path):
         Image.open(path).crop((11, 11, 165, 55)).save("tmp.png")
         result = self.reader.readtext(f'tmp.png')
@@ -312,4 +341,31 @@ class THSTrader:
             "委托价格": float(stock_price.replace(",", "")),
             "委托数量": int(stock_count.replace(",", "")),
             "委托类型": t.replace(" ", "")
+        }
+    
+    def __ocr_parse_withdrawal2(self, path):
+        img = Image.open(path)
+        # 定义需要识别的区域
+        regions = {
+            "name": (11, 11, 165, 55),    # 股票名称区域
+            "price": (219, 11, 390, 55),  # 价格区域
+            "count": (419, 11, 548, 55),  # 数量区域
+            "type": (589, 11, 704, 55)    # 类型区域
+        }
+        
+        # 直接在原图上识别指定区域
+        results = {}
+        for key, bbox in regions.items():
+            result = self.reader.readtext(
+                img, 
+                bbox=bbox,  # 指定识别区域
+                detail=0    # 只返回文本结果
+            )[0]  # 取第一个结果
+            results[key] = result
+        
+        return {
+            "股票名称": results["name"].replace(" ", ""),
+            "委托价格": float(results["price"].replace(",", "")),
+            "委托数量": int(results["count"].replace(",", "")),
+            "委托类型": results["type"].replace(" ", "")
         }
