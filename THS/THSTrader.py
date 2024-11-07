@@ -7,11 +7,40 @@ from PIL import Image
 
 
 PAGE_INDICATOR = {
-    "模拟炒股": "com.hexin.plat.android:id/tab_mn",
+    "模拟": "com.hexin.plat.android:id/tab_mn",
     "返回": "com.hexin.plat.android:id/title_bar_img",
     "股票多选": "com.hexin.plat.android:id/stockname_tv",
     "关闭按钮1": "com.hexin.plat.android:id/close_btn",
     "确定按钮": "com.hexin.plat.android:id/ok_btn",
+}
+
+RESOURCE_ID = {
+    "模拟": "com.hexin.plat.android:id/tab_mn",
+    "返回": "com.hexin.plat.android:id/title_bar_img",
+    "股票多选": "com.hexin.plat.android:id/stockname_tv",
+    "关闭按钮1": "com.hexin.plat.android:id/close_btn",
+    "确定按钮": "com.hexin.plat.android:id/ok_btn",
+    "持仓按钮": "com.hexin.plat.android:id/menu_holdings_image",
+    "总资产": "com.hexin.plat.android:id/totalasset_value",
+    "可用余额": "com.hexin.plat.android:id/canuse_value",
+    "总市值": "com.hexin.plat.android:id/totalworth_value",
+    "持仓列表": "com.hexin.plat.android:id/recyclerview_id",
+    "撤单按钮": "com.hexin.plat.android:id/menu_withdrawal_image",
+    "撤单列表": "com.hexin.plat.android:id/chedan_recycler_view",
+    "撤单选项": "com.hexin.plat.android:id/option_chedan",
+    "买入按钮": "com.hexin.plat.android:id/menu_buy_image",
+    "卖出按钮": "com.hexin.plat.android:id/menu_sale_image",
+    "股票代码框": "com.hexin.plat.android:id/content_stock",
+    "股票列表": "com.hexin.plat.android:id/recyclerView",
+    "价格输入框": "com.hexin.plat.android:id/stockprice",
+    "数量输入框": "com.hexin.plat.android:id/stockvolume",
+    "交易布局": "com.hexin.plat.android:id/transaction_layout",
+    "股票名称值": "com.hexin.plat.android:id/stock_name_value",
+    "股票代码值": "com.hexin.plat.android:id/stock_code_value",
+    "数量值": "com.hexin.plat.android:id/number_value",
+    "价格值": "com.hexin.plat.android:id/price_value",
+    "取消按钮": "com.hexin.plat.android:id/cancel_btn",
+    "内容滚动": "com.hexin.plat.android:id/content_scroll",
 }
 
 MAX_COUNT = 1000   # 最大可显示持仓数目，调试用
@@ -27,20 +56,20 @@ class THSTrader:
     def get_balance(self):
         """ 获取资产 """
         self.__back_to_moni_page()
-        self.d(resourceId=f"com.hexin.plat.android:id/menu_holdings_image").click()
+        self.d(resourceId=RESOURCE_ID["持仓按钮"]).click()
         time.sleep(1)
         self.d.swipe(340, 600, 340, 1000)
         time.sleep(1)
         return {
-            "总资产": float(self.d(resourceId="com.hexin.plat.android:id/totalasset_value").get_text().replace(",", "")),
-            "可用余额": float(self.d(resourceId="com.hexin.plat.android:id/canuse_value").get_text().replace(",", "")),
-            "股票市值": float(self.d(resourceId="com.hexin.plat.android:id/totalworth_value").get_text().replace(",", "")),
+            "总资产": float(self.d(resourceId=RESOURCE_ID["总资产"]).get_text().replace(",", "")),
+            "可用余额": float(self.d(resourceId=RESOURCE_ID["可用余额"]).get_text().replace(",", "")),
+            "股票市值": float(self.d(resourceId=RESOURCE_ID["总市值"]).get_text().replace(",", "")),
         }
     
     def get_position(self):
         """ 获取当前持有股票 """
         self.__back_to_moni_page()
-        self.d(resourceId=f"com.hexin.plat.android:id/menu_holdings_image").click()
+        self.d(resourceId=RESOURCE_ID["持仓按钮"]).click()
         time.sleep(1)
         i = 0
         first = True
@@ -72,7 +101,7 @@ class THSTrader:
     def get_avail_withdrawals(self):
         """ 获取可以撤单的列表 """
         self.__back_to_moni_page()
-        self.d(resourceId=f"com.hexin.plat.android:id/menu_withdrawal_image").click()
+        self.d(resourceId=RESOURCE_ID["撤单按钮"]).click()
         time.sleep(1)
         
         i = 0
@@ -102,7 +131,7 @@ class THSTrader:
     def withdraw(self, stock_name, t, amount, price):
         """ 撤单 """
         self.__back_to_moni_page()
-        self.d(resourceId=f"com.hexin.plat.android:id/menu_withdrawal_image").click()
+        self.d(resourceId=RESOURCE_ID["撤单按钮"]).click()
         time.sleep(1)
         success = False
         i = 0
@@ -118,7 +147,7 @@ class THSTrader:
                         and (abs(float(price) -  float(info["委托价格"])) < 0.01) and (t == info["委托类型"]):
                             self.d.xpath(f'//*[@resource-id="com.hexin.plat.android:id/chedan_recycler_view"]/android.widget.LinearLayout[{i+1}]').click()
                             time.sleep(1)
-                            self.d(resourceId="com.hexin.plat.android:id/option_chedan").click()
+                            self.d(resourceId=RESOURCE_ID["撤单选项"]).click()
                             time.sleep(1)
                             success = True
                             break
@@ -136,10 +165,10 @@ class THSTrader:
         }
 
     def buy(self, stock_no, amount, price):
-        return self.__imeaction(stock_no, amount, price, "menu_buy_image")
+        return self.__imeaction(stock_no, amount, price, RESOURCE_ID["买入按钮"])
         
     def sell(self, stock_no, amount, price):
-        return self.__imeaction(stock_no, amount, price, "menu_sale_image")
+        return self.__imeaction(stock_no, amount, price, RESOURCE_ID["卖出按钮"])
 
     def __imeaction(self, stock_no, amount, price, open_tag):
         """ 买入或者卖出通用 """
@@ -151,29 +180,29 @@ class THSTrader:
         stock_name = ""
         while True:
             self.__back_to_moni_page()
-            self.d(resourceId=f"com.hexin.plat.android:id/{open_tag}").click()
+            self.d(resourceId=open_tag).click()
             self.__input_stock_no(stock_no)
             self.__input_stock_price(price)
             self.__input_stock_buy_count(amount)
-            self.d.xpath('//*[@resource-id="com.hexin.plat.android:id/transaction_layout"]/android.widget.LinearLayout[1]').click()
+            self.d(resourceId=RESOURCE_ID["交易布局"]).click()
             time.sleep(1)
             if self.__entrust_doubel_check(stock_no, amount, price):
                 try:
-                    stock_name = self.d(resourceId="com.hexin.plat.android:id/stock_name_value").get_text()
-                    self.d(resourceId="com.hexin.plat.android:id/ok_btn").click()
+                    stock_name = self.d(resourceId=RESOURCE_ID["股票名称值"]).get_text()
+                    self.d(resourceId=RESOURCE_ID["确定按钮"]).click()
                     time.sleep(1)
-                    self.d(resourceId="com.hexin.plat.android:id/content_scroll").screenshot().save(f"tmp.png")
+                    self.d(resourceId=RESOURCE_ID["内容滚动"]).screenshot().save(f"tmp.png")
                     msg = self.__ocr_get_full_text()
-                    self.d(resourceId="com.hexin.plat.android:id/ok_btn").click()
+                    self.d(resourceId=RESOURCE_ID["确定按钮"]).click()
                     success = True
                     break
                 except: 
                     raise
             else:
-                self.d(resourceId="com.hexin.plat.android:id/cancel_btn").click()
+                self.d(resourceId=RESOURCE_ID["取消按钮"]).click()
                 time.sleep(2)
                 
-        if open_tag == "menu_buy_image":
+        if open_tag == RESOURCE_ID["买入按钮"]:
             t = "买入"
         else:
             t = "卖出"
@@ -188,14 +217,14 @@ class THSTrader:
 
     def __entrust_doubel_check(self, stock_no, amount, price):
         time.sleep(1)
-        if self.d(resourceId="com.hexin.plat.android:id/stock_code_value").get_text().replace(" ", "") != stock_no:
+        if self.d(resourceId=RESOURCE_ID["股票代码值"]).get_text().replace(" ", "") != stock_no:
             return False
         
-        if self.d(resourceId="com.hexin.plat.android:id/number_value").get_text().replace(" ", "").replace(",", "") != amount:
+        if self.d(resourceId=RESOURCE_ID["数量值"]).get_text().replace(" ", "").replace(",", "") != amount:
             return False
         
         price = float(price)
-        pnow = float(self.d(resourceId="com.hexin.plat.android:id/price_value").get_text())
+        pnow = float(self.d(resourceId=RESOURCE_ID["价格值"]).get_text())
         if abs(price - pnow) > 0.01:
             return False
         
@@ -205,23 +234,23 @@ class THSTrader:
         self.__util_close_other()
         self.d.app_start("com.hexin.plat.android")
         self.d.xpath('//*[@content-desc="交易"]/android.widget.ImageView[1]').click()
-        if self.__util_check_app_page(PAGE_INDICATOR["返回"]):
+        if self.__util_check_app_page(RESOURCE_ID["返回"]):
             try:
-                self.d(resourceId="com.hexin.plat.android:id/title_bar_img").click()
+                self.d(resourceId=RESOURCE_ID["返回"]).click()
             except: pass 
 
-        self.d(resourceId="com.hexin.plat.android:id/tab_mn").click()
+        self.d(resourceId=RESOURCE_ID["模拟"]).click()
 
            
     
     def __input_stock_no(self, stock_no):
         """ 输入股票ID """
         self.__util_close_other()
-        self.d(resourceId="com.hexin.plat.android:id/content_stock").click()
+        self.d(resourceId=RESOURCE_ID["股票代码框"]).click()
         time.sleep(2)
         self.__util_input_text(stock_no)
         time.sleep(2)
-        if self.__util_check_app_page(PAGE_INDICATOR["股票多选"]):
+        if self.__util_check_app_page(RESOURCE_ID["股票多选"]):
             try:
                 self.d.xpath('//*[@resource-id="com.hexin.plat.android:id/recyclerView"]/android.widget.RelativeLayout[1]').click()
             except: pass
@@ -229,27 +258,27 @@ class THSTrader:
     def __input_stock_price(self, price):
         """ 输入股票价格 """
         self.__util_close_other()
-        self.d(resourceId="com.hexin.plat.android:id/stockprice").click()
+        self.d(resourceId=RESOURCE_ID["价格输入框"]).click()
         time.sleep(2)
         self.__util_input_text(price)
 
     def __input_stock_buy_count(self, buy_count):
         """ 输入股票购买量 """
         self.__util_close_other()
-        self.d(resourceId="com.hexin.plat.android:id/stockvolume").click()
+        self.d(resourceId=RESOURCE_ID["数量输入框"]).click()
         time.sleep(2)
         self.__util_input_text(buy_count)
 
     def __util_close_other(self):
         time.sleep(1)
-        if self.__util_check_app_page(PAGE_INDICATOR["关闭按钮1"]):
+        if self.__util_check_app_page(RESOURCE_ID["关闭按钮1"]):
             try:
-                self.d(resourceId=PAGE_INDICATOR["关闭按钮1"]).click()
+                self.d(resourceId=RESOURCE_ID["关闭按钮1"]).click()
             except: pass
         
-        if self.__util_check_app_page(PAGE_INDICATOR["确定按钮"]):
+        if self.__util_check_app_page(RESOURCE_ID["确定按钮"]):
             try:
-                self.d(resourceId=PAGE_INDICATOR["确定按钮"]).click()
+                self.d(resourceId=RESOURCE_ID["确定按钮"]).click()
             except: pass
 
     def __util_input_text(self, text):
